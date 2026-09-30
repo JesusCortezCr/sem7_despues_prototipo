@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Matrícula Estudiantil - v2</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-color: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+
+        /* Navegación Principal */
+        .navbar {
+            background-color: var(--card-bg);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .navbar h1 {
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+
+        .nav-links button {
+            background: none;
+            border: none;
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 1rem;
+            cursor: pointer;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .nav-links button:hover {
+            background-color: var(--bg-color);
+            color: var(--primary);
+        }
+
+        /* Contenedor Principal */
+        .container {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        /* Indicador de Progreso (Stepper) */
+        .stepper {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .step.active {
+            color: var(--primary);
+        }
+
+        .step-number {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: var(--border);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .step.active .step-number {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        /* Tarjetas de Sección */
+        .seccion {
+            display: none;
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        .seccion.activo {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        p.subtitle {
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Controles de Formulario */
+        .input-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        /* Botones */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        /* MEJORA: Cambio de color evidente al hacer hover en el botón de Ver Horarios */
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-danger {
+            background-color: var(--danger);
+            color: white;
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn:disabled {
+            background-color: var(--border) !important;
+            color: var(--text-muted) !important;
+            border-color: var(--border) !important;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Tablas */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: #f9fafb;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Badges / Etiquetas */
+        .badge {
+            padding: 0.35rem 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success { background-color: #d1fae5; color: #065f46; border: 1px solid #34d399; }
+        .badge-danger { background-color: #fee2e2; color: #991b1b; border: 1px solid #f87171;}
+        .badge-warning { background-color: #fef3c7; color: #92400e; border: 1px solid #fbbf24;}
+
+        .acciones-pie {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .toast {
+            background-color: var(--success);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            margin-top: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: slideIn 0.3s forwards, fadeOut 0.3s forwards 2.7s;
+        }
+
+        .toast.error { background-color: var(--danger); }
+        .toast.info { background-color: var(--primary); }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; display: none; }
+        }
+
+        /* Ventana Modal (MEJORA) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            width: 90%;
+            max-width: 600px;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: var(--success);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Grid del Horario (Calendario) */
+        .horario-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background-color: var(--border);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .horario-header { background-color: #f9fafb; padding: 1rem; text-align: center; font-weight: 600; }
+        .horario-celda { background-color: white; min-height: 120px; padding: 0.5rem; }
+        .curso-card { background-color: #eff6ff; border-left: 3px solid var(--primary); padding: 0.5rem; border-radius: 4px; font-size: 0.875rem; margin-bottom: 0.5rem; }
+        .empty-state { text-align: center; padding: 3rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <h1>UNIVERSIDAD PERU</h1>
+        <div class="nav-links">
+            <button onclick="irPaso(1)">Proceso de Matrícula</button>
+            <button onclick="mostrarCalendario()">🗓️ Mi Horario</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        
+        <div class="stepper" id="stepper">
+            <div class="step active" id="step-1">
+                <div class="step-number">1</div>
+                Buscar Cursos
+            </div>
+            <div class="step" id="step-2">
+                <div class="step-number">2</div>
+                Seleccionar Horario
+            </div>
+            <div class="step" id="step-3">
+                <div class="step-number">3</div>
+                Confirmar Matrícula
+            </div>
+        </div>
+
+        <!-- SECCIÓN 1: BUSCAR CURSOS -->
+        <main id="sec-buscar" class="seccion activo">
+            <h2>Buscar Cursos</h2>
+            <p class="subtitle">Encuentra los cursos disponibles para este semestre.</p>
+            
+            <div class="input-group">
+                <!-- MEJORA: Datalist agregado para mostrar cursos disponibles al hacer clic/escribir -->
+                <input type="text" id="input-busqueda" list="lista-cursos" placeholder="Escribe o selecciona un curso..." oninput="filtrarCursos()">
+                <datalist id="lista-cursos">
+                    <option value="Ingeniería de Sistemas Distribuidos"></option>
+                    <option value="Arquitectura de Software"></option>
+                    <option value="Base de Datos Avanzada"></option>
+                    <option value="Gestión de Proyectos TI"></option>
+                </datalist>
+                <button class="btn btn-primary" onclick="buscarCursos()">Buscar</button>
+            </div>
+            
+            <div id="resultado-busqueda" style="display:block;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Nombre del Curso</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body-resultados">
+                        <tr>
+                            <td>SIS-101</td>
+                            <td>Ingeniería de Sistemas Distribuidos</td>
+                            <td><button class="btn btn-outline" onclick="verHorarios('SIS-101', 'Ingeniería de Sistemas Distribuidos')">Ver Horarios</button></td>
+                        </tr>
+                        <tr>
+                            <td>SIS-102</td>
+                            <td>Arquitectura de Software</td>
+                            <td><button class="btn btn-outline" onclick="verHorarios('SIS-102', 'Arquitectura de Software')">Ver Horarios</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+        <!-- SECCIÓN 2: SELECCIONAR HORARIOS -->
+        <main id="sec-horarios" class="seccion">
+            <h2>Horarios Disponibles</h2>
+            <p class="subtitle" id="curso-titulo">Seleccione el horario de su preferencia.</p>
+            
+            <table id="tabla-horarios">
+                <thead>
+                    <tr>
+                        <th>Grupo</th>
+                        <th>Día y Hora</th>
+                        <th>Profesor</th>
+                        <th>Disponibilidad</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="body-horarios">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+
+            <div class="acciones-pie">
+                <button class="btn btn-outline" onclick="irPaso(1)" style="margin-right: auto;">← Volver</button>
+                <button class="btn btn-primary" onclick="irPaso(3)">Ir a Confirmación →</button>
+            </div>
+        </main>
+
+        <!-- SECCIÓN 3: CONFIRMACIÓN Y RESUMEN -->
+        <main id="sec-confirmacion" class="seccion">
+            <h2>Resumen de Matrícula</h2>
+            <p class="subtitle">Revise los cursos agregados. Puede eliminar los que no desee antes de finalizar.</p>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th>Curso</th>
+                        <th>Grupo</th>
+                        <th>Horario</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="body-confirmacion">
+                    <!-- Se llena con JS -->
+                </tbody>
+            </table>
+
+            <div class="acciones-pie">
+                <button class="btn btn-outline" onclick="irPaso(2)" style="margin-right: auto;">← Volver</button>
+                <!-- MEJORA: Este botón ahora abrirá la ventana Modal -->
+                <button class="btn btn-primary" onclick="abrirModalFinal()">Finalizar Matrícula</button>
+            </div>
+        </main>
+
+        <!-- SECCIÓN 4: CALENDARIO -->
+        <main id="sec-calendario" class="seccion">
+            <h2>Mi Horario</h2>
+            <p class="subtitle">Vista semanal de sus cursos matriculados.</p>
+            <div id="contenedor-horario"></div>
+        </main>
+
+    </div>
+
+    <!-- MEJORA: Ventana Modal para Confirmación Final -->
+    <div class="modal-overlay" id="modal-confirmacion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✅ ¡Matrícula Exitosa!</h3>
+                <button class="btn btn-outline" style="padding: 0.25rem 0.5rem; border:none; font-size:1.5rem;" onclick="cerrarModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1rem; color: var(--text-muted);">Tus cursos han sido registrados correctamente en el sistema. Este es tu resumen oficial:</p>
+                <table style="font-size: 0.875rem;">
+                    <thead>
+                        <tr>
+                            <th>Curso</th>
+                            <th>Grupo</th>
+                            <th>Día y Hora</th>
+                        </tr>
+                    </thead>
+                    <tbody id="modal-tbody">
+                        <!-- Se llena dinámicamente -->
+                    </tbody>
+                </table>
+                <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                    <button class="btn btn-outline" style="flex: 1;" onclick="cerrarModal()">Cerrar</button>
+                    <button class="btn btn-primary" style="flex: 1;" onclick="window.print()">🖨️ Imprimir Constancia</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script>
+        let cursoActual = { id: '', nombre: '' };
+        let cursosMatriculados = [];
+
+        const mockHorarios = [
+            { grupo: 'G1', dia: 'Lunes', hora: '08:00 - 12:00', profesor: 'Ing. Pérez', vacantes: 0 },
+            { grupo: 'G2', dia: 'Martes', hora: '18:00 - 22:00', profesor: 'Ing. Gómez', vacantes: 15 },
+            { grupo: 'G3', dia: 'Jueves', hora: '14:00 - 18:00', profesor: 'Ing. Sánchez', vacantes: 5 }
+        ];
+
+        function irPaso(paso) {
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activo'));
+            document.getElementById('sec-calendario').classList.remove('activo');
+            
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('stepper').style.display = 'flex';
+
+            if (paso === 1) {
+                document.getElementById('sec-buscar').classList.add('activo');
+                document.getElementById('step-1').classList.add('active');
+            } else if (paso === 2) {
+                document.getElementById('sec-horarios').classList.add('activo');
+                document.getElementById('step-2').classList.add('active');
+                renderizarHorarios();
+            } else if (paso === 3) {
+                document.getElementById('sec-confirmacion').classList.add('activo');
+                document.getElementById('step-3').classList.add('active');
+                renderizarConfirmacion();
+            }
+        }
+
+        function mostrarToast(mensaje, tipo = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${tipo}`;
+            const icon = tipo === 'success' ? '✅' : (tipo === 'error' ? '❌' : 'ℹ️');
+            toast.innerHTML = `<span>${icon}</span> ${mensaje}`;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3000);
+        }
+
+        function buscarCursos() {
+            // Animación sencilla para simular búsqueda
+            document.getElementById('resultado-busqueda').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('resultado-busqueda').style.opacity = '1';
+            }, 200);
+        }
+
+        function verHorarios(id, nombre) {
+            cursoActual = { id, nombre };
+            document.getElementById('curso-titulo').innerText = `Horarios para: ${nombre}`;
+            irPaso(2);
+        }
+
+        function renderizarHorarios() {
+            const tbody = document.getElementById('body-horarios');
+            tbody.innerHTML = '';
+
+            mockHorarios.forEach((horario, index) => {
+                const yaMatriculado = cursosMatriculados.some(c => c.idCurso === cursoActual.id && c.grupo === horario.grupo);
+                const sinVacantes = horario.vacantes === 0;
+
+                let estadoHtml = '';
+                let botonHtml = '';
+
+                // MEJORA: Textos específicos para la disponibilidad solicitados por el usuario
+                if (sinVacantes) {
+                    estadoHtml = `<span class="badge badge-danger">Salones llenos</span>`;
+                    botonHtml = `<button class="btn btn-outline" disabled title="No hay vacantes disponibles">Sin Vacantes</button>`;
+                } else {
+                    estadoHtml = `<span class="badge badge-success">Vacantes disponibles: ${horario.vacantes}</span>`;
+                    if (yaMatriculado) {
+                        botonHtml = `<button class="btn btn-outline" disabled>✅ Agregado</button>`;
+                    } else {
+                        botonHtml = `<button class="btn btn-primary" onclick="matricular(${index})">+ Matricular</button>`;
+                    }
+                }
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${horario.grupo}</td>
+                        <td>${horario.dia} <br> <small class="text-muted">${horario.hora}</small></td>
+                        <td>${horario.profesor}</td>
+                        <td>${estadoHtml}</td>
+                        <td>${botonHtml}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function matricular(indexHorario) {
+            const horario = mockHorarios[indexHorario];
+            cursosMatriculados.push({
+                id: Date.now(),
+                idCurso: cursoActual.id,
+                nombre: cursoActual.nombre,
+                grupo: horario.grupo,
+                dia: horario.dia,
+                hora: horario.hora
+            });
+            mostrarToast(`Curso ${cursoActual.nombre} agregado exitosamente.`);
+            renderizarHorarios();
+        }
+
+        function renderizarConfirmacion() {
+            const tbody = document.getElementById('body-confirmacion');
+            tbody.innerHTML = '';
+
+            if (cursosMatriculados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#6b7280; padding:2rem;">No has agregado ningún curso aún.</td></tr>`;
+                return;
+            }
+
+            cursosMatriculados.forEach(curso => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${curso.nombre}</strong><br><small>${curso.idCurso}</small></td>
+                        <td>${curso.grupo}</td>
+                        <td>${curso.dia}, ${curso.hora}</td>
+                        <td><button class="btn btn-danger" onclick="eliminarCurso(${curso.id})" title="Eliminar curso">🗑️ Eliminar</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        function eliminarCurso(idUnico) {
+            cursosMatriculados = cursosMatriculados.filter(c => c.id !== idUnico);
+            mostrarToast('Curso removido de tu matrícula.', 'info');
+            renderizarConfirmacion();
+        }
+
+        // MEJORA: Funciones para la Ventana Modal
+        function abrirModalFinal() {
+            if (cursosMatriculados.length === 0) {
+                mostrarToast('No puedes finalizar sin cursos matriculados.', 'error');
+                return;
+            }
+            
+            // Llenar tabla del modal
+            const tbody = document.getElementById('modal-tbody');
+            tbody.innerHTML = '';
+            cursosMatriculados.forEach(curso => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${curso.nombre}</strong></td>
+                        <td>${curso.grupo}</td>
+                        <td>${curso.dia}, ${curso.hora}</td>
+                    </tr>
+                `;
+            });
+
+            // Mostrar Modal
+            document.getElementById('modal-confirmacion').classList.add('active');
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal-confirmacion').classList.remove('active');
+            // Opcional: Redirigir al inicio o limpiar
+            cursosMatriculados = []; // Limpiamos para nueva matrícula
+            irPaso(1);
+            mostrarToast('Se ha iniciado un nuevo proceso de matrícula.', 'info');
+        }
+
+        function mostrarCalendario() {
+            document.querySelectorAll('.seccion').forEach(s => s.classList.remove('activo'));
+            document.getElementById('stepper').style.display = 'none';
+            document.getElementById('sec-calendario').classList.add('activo');
+            
+            const contenedor = document.getElementById('contenedor-horario');
+            
+            if (cursosMatriculados.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="empty-state">
+                        <h3>Tu horario está vacío</h3>
+                        <p>Matricúlate en cursos para verlos organizados aquí.</p>
+                        <button class="btn btn-primary" style="margin-top:1rem;" onclick="irPaso(1)">Buscar Cursos</button>
+                    </div>`;
+                return;
+            }
+
+            const diasSemana = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"];
+            let gridHtml = `<div class="horario-grid">`;
+            
+            diasSemana.forEach(dia => { gridHtml += `<div class="horario-header">${dia}</div>`; });
+            diasSemana.forEach(dia => {
+                gridHtml += `<div class="horario-celda">`;
+                const cursosDelDia = cursosMatriculados.filter(c => c.dia === dia);
+                cursosDelDia.forEach(curso => {
+                    gridHtml += `
+                        <div class="curso-card">
+                            <strong>${curso.idCurso}</strong><br>
+                            ${curso.nombre}<br>
+                            <small>${curso.hora} (${curso.grupo})</small>
+                        </div>
+                    `;
+                });
+                gridHtml += `</div>`;
+            });
+
+            gridHtml += `</div>`;
+            contenedor.innerHTML = gridHtml;
+        }
+    </script>
+</body>
+</html>
